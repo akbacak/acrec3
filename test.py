@@ -37,8 +37,9 @@ train = VideoFrameGenerator(
     transformation=data_aug,
     use_frame_cache=False)
 
-import keras_video.utils
-keras_video.utils.show_sample(train)
+valid = train.get_validation_generator()
+#import keras_video.utils
+#keras_video.utils.show_sample(train)
 
 num_classes = 51
 

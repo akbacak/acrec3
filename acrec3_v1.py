@@ -79,13 +79,18 @@ model = get_model(INSHAPE, len(classes))
 
 optimizer = keras.optimizers.Adam(0.001)
 
-
+callbacks = [
+    keras.callbacks.ReduceLROnPlateau(verbose=1),
+    keras.callbacks.ModelCheckpoint(
+        'chkp/weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+        verbose=1),
+]
 
 EPOCHS=120 
 hist = model.fit_generator(
     train,
     validation_data=valid,
     verbose=1,
-    epochs=EPOCHS
-    #callbacks=callbacks
+    epochs=EPOCHS,
+    callbacks=callbacks
 )

@@ -3,6 +3,7 @@ import glob
 import keras
 #from keras_video import VideoFrameGenerator# use sub directories names as classes
 from generator import *
+#from utils import *
 from keras.applications import InceptionV3
 from keras import layers
 from keras.layers.recurrent import LSTM
@@ -38,8 +39,10 @@ train = VideoFrameGenerator(
     use_frame_cache=False)
 
 valid = train.get_validation_generator()
+
 #import keras_video.utils
 #keras_video.utils.show_sample(train)
+#show_sample(train)
 
 num_classes = 51
 
@@ -60,11 +63,14 @@ def get_model(shape=(NBFRAME, 112, 112, 3), nbout=3):
     Dense_3   = Dense(num_classes, activation='sigmoid')(batchNorm2)
     model = keras.models.Model(input = video , output = Dense_3)
 
-
     model.summary()
     #plot_model(model, show_shapes=True,
     #           to_file='model.png')
-    
+
+    from keras.optimizers import SGD
+    sgd = SGD(lr=0.002, decay = 1e-5, momentum=0.9, nesterov=True)
+
+    model.compile(loss = 'categorical_crossentropy',  optimizer=sgd, metrics=['acc'])
     return model
 
 
@@ -73,24 +79,13 @@ model = get_model(INSHAPE, len(classes))
 
 optimizer = keras.optimizers.Adam(0.001)
 
-model.compile(loss = 'categorical_crossentropy',  optimizer=optimizer, metrics=['acc'])
 
 
 EPOCHS=120 
-'''
-# create a "chkp" directory before to run that
-# because ModelCheckpoint will write models inside
-callbacks = [
-    keras.callbacks.ReduceLROnPlateau(verbose=1),
-    keras.callbacks.ModelCheckpoint(
-        'chkp/weights.{epoch:02d}-{val_loss:.2f}.hdf5',
-        verbose=1),
-]
-'''
-model.fit_generator(
+hist = model.fit_generator(
     train,
-    #validation_data=valid,
+    validation_data=valid,
     verbose=1,
-    epochs=EPOCHS,
+    epochs=EPOCHS
     #callbacks=callbacks
 )
